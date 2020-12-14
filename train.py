@@ -124,10 +124,10 @@ def write_log(log_dir, savename, epoch, data, num_to_keep=1):
     # Remove old loss files
     loss_files = sorted(glob.glob(f'{log_dir}/*{savename}*'), key=os.path.getmtime)
     for f in loss_files[:-num_to_keep]:
-      os.remove(f)
+        os.remove(f)
 
 
-def save_state(save_dir, savename, epoch, file_name, model, optimizer, epoch, num_to_keep=0):
+def save_state(save_dir, savename, model, optimizer, epoch, num_to_keep=0):
     checkpoint = {
         'model': model.state_dict(),
         'optimizer': optimizer.state_dict(),
@@ -176,9 +176,14 @@ def load_losses(log_dir, savename):
         return x[0], x[1]
     
 if __name__ == '__main__':
-    base_dir = '/home/users/akshayj/beta_vae'
     
-    DATASET = 'animals'
+    #### SPECIFY DATASET AND VERSION (unique savename)
+    DATASET = 'celeba' # either 'celeba' or 'animals'
+    ver= 'v1'
+    ####################
+
+
+    base_dir = '/home/users/akshayj/beta_vae'
     SAVE_DIR = f'{base_dir}/checkpoints'
     IMAGE_DIR = f'{base_dir}/images'
     LOG_PATH = f'{base_dir}/losses'
@@ -186,18 +191,18 @@ if __name__ == '__main__':
         DATADIR = f'{base_dir}/animals'
         IMSIZE=256
     elif DATASET.lower() == 'celeba':
-        DATADIR = f'/scratch/groups/jlg/akshay/CelebA'
+        DATADIR = f'/scratch/groups/jlg/CelebA'
         IMSIZE=64
     else:
         print(f'Model not implemented for this dataset: {DATASET}')
-        return
+        assert DATASET.lower() in ['animals', 'celeba'], 'dataset not implemented'
+        
     LATENT_SIZE = 32
     BATCH_SIZE = 25
     BETA = 4
     LEARNING_RATE = 1e-5
     LOG_INTERVAL = 100
     EPOCHS = 500
-    ver= 'v14'
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print('Running on device: ', device)
@@ -206,11 +211,11 @@ if __name__ == '__main__':
     train_loader, test_loader = get_data_loader(DATADIR, batch_size=BATCH_SIZE, imsize=IMSIZE)
     
     # Initialize BetaVAE model with Adam optimizer.
-    model = BetaVAE(latent_size=LATENT_SIZE, beta=BETA).to(device)
+    model = BetaVAE(latent_size=LATENT_SIZE, beta=BETA, imsize=IMSIZE).to(device)
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, eps=1e-4)
     
     # This will be the unique identifier for checkpoint and loss files.
-    SAVENAME=f'{DATASET}_{ver}_beta{BETA}_z{LATENT_SIZE}'
+    SAVENAME=f'{DATASET}_{ver}_beta{BETA}_z{LATENT_SIZE}_{IMSIZE}x{IMSIZE}'
     
     # If we're resuming a previously run model, load the losses and weights and epoch.
     train_losses, test_losses = load_losses(LOG_PATH, SAVENAME)
@@ -227,5 +232,5 @@ if __name__ == '__main__':
         save_image(original_images + rect_images, f'{IMAGE_DIR}/images_{SAVENAME}_e{epoch}.png', 
                    padding=0, nrow=len(original_images))
         write_log(LOG_PATH, SAVENAME, epoch, (train_losses, test_losses))
-        save_state(SAVE_DIR, SAVENAME, epoch, model, optimizer, epoch, num_to_keep=5)
+        save_state(SAVE_DIR, SAVENAME, model, optimizer, epoch, num_to_keep=5)
             
