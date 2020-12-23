@@ -179,7 +179,7 @@ if __name__ == '__main__':
     
     #### SPECIFY DATASET AND VERSION (unique savename)
     DATASET = 'celeba' # either 'celeba' or 'animals'
-    ver= 'v1'
+    ver= 'v2'
     ####################
 
 
@@ -197,7 +197,7 @@ if __name__ == '__main__':
         print(f'Model not implemented for this dataset: {DATASET}')
         assert DATASET.lower() in ['animals', 'celeba'], 'dataset not implemented'
         
-    LATENT_SIZE = 32
+    LATENT_SIZE = 10 
     BATCH_SIZE = 25
     BETA = 4
     LEARNING_RATE = 1e-5
