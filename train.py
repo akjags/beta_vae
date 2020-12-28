@@ -202,7 +202,7 @@ if __name__ == '__main__':
     BETA = 4
     LEARNING_RATE = 1e-5
     LOG_INTERVAL = 100
-    EPOCHS = 500
+    EPOCHS = 1000
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print('Running on device: ', device)
